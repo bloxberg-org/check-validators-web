@@ -48,14 +48,17 @@ export default function ValidatorList({ validators, lastBlocks, onlineCount14d, 
 
   return (
     <Container fluid>
-      <Row fluid className="d-flex justify-content-center">
+      <Row fluid className="d-flex justify-content-center my-2">
         <h1>
           Validators
         </h1>
       </Row>
-      <Row>
+      <Row className="justify-content-center m-2">
+        Wait for all validator statuses to be checked. Choose validators to view in detailed uptime graph by clicking + on the right and go to the Graph page above.
+      </Row>
+      <Row className="my-3">
         <Col>
-          <Row className="justify-content-center">
+          <Row className="justify-content-center font-weight-bold">
             Validators online in 24 hours
           </Row>
           <Row className="justify-content-center">
@@ -63,7 +66,7 @@ export default function ValidatorList({ validators, lastBlocks, onlineCount14d, 
           </Row>
         </Col>
         <Col>
-          <Row className="justify-content-center">
+          <Row className="justify-content-center font-weight-bold">
             Validators online in 14 days
           </Row>
           <Row className="justify-content-center">

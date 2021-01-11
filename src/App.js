@@ -76,7 +76,7 @@ function App() {
   return (
     <Router>
       <Navbar bg="dark" variant="dark">
-        <Navbar.Brand>bloxberg Validators controller</Navbar.Brand>
+        <Navbar.Brand>bloxberg Validator Monitor</Navbar.Brand>
         <Nav>
           <Nav.Item>
             <LinkContainer to="/List">

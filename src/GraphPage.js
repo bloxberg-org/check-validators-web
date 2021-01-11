@@ -19,8 +19,20 @@ export default function GraphPage({ graphValidators, blockData, setBlocksData, v
     })
   }
 
+  if (graphValidators.length === 0) {
+    return (
+      <Container fluid className="h-100 d-flex justify-content-center align-items-center">
+        <div>
+          To view a graph add a validator from the list
+        </div>
+      </Container>
+    )
+  }
   return (
     <Container fluid>
+      <p className="m-2">
+        View the uptimes of validators on graphs. <span style={{ color: "green" }}>Green</span> fields represent online times and <span style={{ color: "red" }}>red</span> fields show offline times. You can view the hours online by toggling days/hours. Click "Load Before" to view earlier dates. Scroll with mouse to zoom in-out. Move the graph by left clicking the mouse and sliding the graph.
+      </p>
       {
         graphValidators.map((validatorAddr, i) => {
           return (
