@@ -8,6 +8,7 @@ import {
   Route, Switch
 } from "react-router-dom";
 import GraphPage from './GraphPage';
+import logo from './logo.js';
 import { getLastBlock, getValidatorsList, isWithin14d, isWithin24h } from './utils';
 import ValidatorsList from './ValidatorList';
 
@@ -75,8 +76,14 @@ function App() {
 
   return (
     <Router>
-      <Navbar bg="dark" variant="dark">
-        <Navbar.Brand>bloxberg Validator Monitor</Navbar.Brand>
+      <Navbar bg="primary" variant="dark">
+        <Navbar.Brand>
+          <div>
+            <a href='/'>
+              <img src={logo} alt='bloxberg logo' height='32px' />
+            </a>
+          </div>
+        </Navbar.Brand>
         <Nav>
           <Nav.Item>
             <LinkContainer to="/List">

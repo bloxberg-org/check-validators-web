@@ -6,6 +6,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Spinner from 'react-bootstrap/Spinner';
 import Table from 'react-bootstrap/Table';
+import './Table.css';
 import { getEmoji, getInstituteName, isWithin14d, isWithin24h } from './utils';
 
 export default function ValidatorList({ validators, lastBlocks, onlineCount14d, onlineCount24h, addGraphValidator, removeGraphValidator, graphValidators, setInstituteName, validatorNames }) {
@@ -17,7 +18,7 @@ export default function ValidatorList({ validators, lastBlocks, onlineCount14d, 
       </Spinner>;
   } else {
     validatorTable =
-      <Table striped bordered hover variant="dark">
+      <Table striped bordered hover variant='light'>
         <thead>
           <tr>
             <th>Institute Name</th>
@@ -47,14 +48,20 @@ export default function ValidatorList({ validators, lastBlocks, onlineCount14d, 
   }
 
   return (
-    <Container fluid>
-      <Row fluid className="d-flex justify-content-center my-2">
+    <Container>
+      <Row className="d-flex justify-content-center my-2">
         <h1>
-          Validators
+          Bloxberg Validators Web Monitor
         </h1>
       </Row>
-      <Row className="justify-content-center m-2">
-        Wait for all validator statuses to be checked. Choose validators to view in detailed uptime graph by clicking + on the right and go to the Graph page above.
+      <Row className="justify-content-center text-center m-2">
+        Here you can see the authority nodes in the&nbsp;<a href='https://bloxberg.org'>bloxberg</a>&nbsp;network.
+      </Row>
+      <Row className="justify-content-center text-center m-2">
+        Loading the validator statuses takes a little time and runs sequentially.
+      </Row>
+      <Row className="justify-content-center text-center m-2">
+        Choose validators to view in &nbsp;<strong>detailed uptime graph</strong>&nbsp; by clicking &nbsp;<strong>+</strong>&nbsp; on the right and go to the &nbsp;<strong>Graph</strong>&nbsp; page above.
       </Row>
       <Row className="my-3">
         <Col>
@@ -137,10 +144,10 @@ function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValida
       </td>
       <td>
         {addedToGraph
-          ? <Button onClick={removeGraphValidator} variant="danger" >
+          ? <Button onClick={removeGraphValidator} variant="danger" style={{ borderRadius: '8px' }}>
             <TrashIcon size={16} />
           </Button >
-          : <Button onClick={addGraphValidator} variant="dark">
+          : <Button onClick={addGraphValidator} variant="primary" style={{ borderRadius: '8px' }}>
             <PlusIcon size={16} />
           </Button>
         }

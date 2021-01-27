@@ -1,4 +1,5 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootswatch/dist/pulse/bootstrap.min.css'; // Added this :boom:
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
