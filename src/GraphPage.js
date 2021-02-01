@@ -4,12 +4,20 @@ import Row from 'react-bootstrap/Row';
 import Graph from './Graph';
 
 export default function GraphPage({ graphValidators, blockData, setBlocksData, validatorNames }) {
+
+  // Render graphs sequentially. 
+  // First item in the array is true. Push false values of length graphValidators.
+  // Upon each completed render, set next canRender true to render the next one.
   let tempCanRender = [true]
   for (let i = 0; i < graphValidators.length; i++)
     tempCanRender.push(false);
   const [canRender, setCanRender] = useState(tempCanRender); // Array of size graphvalidators+1
 
-
+  /**
+   * Mark next validator to be rendered.
+   * 
+   * @param {Number} index index of the validator successfully rendered
+   */
   function nextCanRender(index) {
     console.log('Index ' + (index + 1) + ' can render!');
     setCanRender(prevState => {
@@ -37,7 +45,7 @@ export default function GraphPage({ graphValidators, blockData, setBlocksData, v
         <span style={{ color: "green" }}>Green</span> fields represent online times and <span style={{ color: "red" }}>red</span> fields show offline times.
       </p>
       <p className="m-2">
-        You can view the hours online by toggling days/hours. Click "Load Before" to view earlier dates.
+        You can view the hours online by toggling days/hours. Click "Load Before" to view earlier dates. All times are UTC.
       </p>
       <p className="m-2">
         Scroll with mouse to zoom in-out. Move the graph by left clicking the mouse and sliding the graph.
@@ -45,7 +53,7 @@ export default function GraphPage({ graphValidators, blockData, setBlocksData, v
       {
         graphValidators.map((validatorAddr, i) => {
           return (
-            <Row className='my-4'>
+            <Row className='my-4' key={i}>
               <Graph
                 canRender={canRender[i]}
                 nextCanRender={() => nextCanRender(i)}

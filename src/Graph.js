@@ -19,22 +19,22 @@ export default class Graph extends React.Component {
     this.state = {
       isLoadingMore: false,
       timeseries: null,
-      timerange: new TimeRange(moment().subtract(7, 'days'), moment()), // Timerange to be shown by the graph
-      page: 0,
-      offset: 10000,
-      seeDays: true
+      timerange: new TimeRange(moment.utc().subtract(7, 'days'), moment.utc()), // pond.js Timerange to be shown by the graph
+      page: 0, // blockexplorer query page default
+      offset: 10000, // blockexplorer query offset default
+      seeDays: true // days/hours toggle. Default show days.
     }
   }
 
   componentDidMount() {
     if (!this.props.canRender)
-      return;
+      return; // Do nothing if can't render yet.
     if (this.props.rawData) {
       this.props.nextCanRender()
-      this.blocksToTimeseries(this.props.rawData)
+      this.blocksToTimeseries(this.props.rawData) // Format and render rawData
     } else {
       this.getBlocksBefore()
-        .then(this.blocksToTimeseries)
+        .then(this.blocksToTimeseries) // Fetch blocks, format adn render fetched raw data.
         .then(this.props.nextCanRender)
     }
   }
@@ -53,41 +53,62 @@ export default class Graph extends React.Component {
     }
   }
 
+  /**
+   * Function to format raw blocks from blockexplorer into time series data.
+   * 
+   * Saves the raw data to App.js's blockData through props.setRawData.
+   * 
+   * @param {Array} blocks 
+   */
   blocksToTimeseries = (blocks) => {
-    let blocksStartDate = moment(blocks[blocks.length - 1].timeStamp);
+    let blocksStartDate = moment.utc(blocks[blocks.length - 1].timeStamp); // Date of the earliest block.
     console.log('Existing earliest block is at: ', blocksStartDate.format());
-    this.props.setRawData(blocks);
+    this.props.setRawData(blocks); // Set raw data for current address. See passed setRawData in GraphPage.
 
     let dateObject;
     console.log('seeDays is ', this.state.seeDays);
-    if (this.state.seeDays)
+    if (this.state.seeDays) // Display days.
       dateObject = this.createDaysObject(blocksStartDate, this.state.displayEndDate);
-    else
+    else // Display hours.
       dateObject = this.createHoursObject(blocksStartDate, this.state.displayEndDate);
     this.iterateValidatedBlocks(blocks, dateObject);
     console.log('Iterated dateObject: ', dateObject);
+    // format into pond.js TimeSeries to plot the graph.
     let tempTimeseries = this.formatObjectToTimeSeriesData(dateObject);
-    this.setState({ timeseries: tempTimeseries });
-    if (blocksStartDate.isBefore(moment(this.state.timerange.begin()))) // Shift display if loaded blocks exceed the left of the current timerange.
-      this.setState({ timerange: new TimeRange(blocksStartDate.subtract(2, 'days').toDate(), this.state.timerange.end()) })
+    this.setState({ timeseries: tempTimeseries }); // render the timeseries data.
+
+    // Shift display if newly fetched blocks exceed the leftmost date of the current timerange on the graph.
+    if (blocksStartDate.isBefore(moment.utc(this.state.timerange.begin()))) {
+      this.setState({
+        timerange: new TimeRange(
+          blocksStartDate.subtract(2, 'days').toDate(),
+          this.state.timerange.end())
+      })
+    }
+
     return Promise.resolve()
   }
 
   handleTimerangeChange = (newTr) => {
     this.setState({ timerange: newTr });
-    // console.log("New timerange start is: " + newTr.begin());
-    // this.setState(prevState => {
-    //   prevState.timerange = new TimeRange(newTr.begin(), prevState.timerange.end());
-    //   return prevState;
-    // }); // Keep end same.
   }
 
-  formatObjectToTimeSeriesData = (hoursObject) => {
-    let eventsArr = Object.keys(hoursObject).map(key => {
-      // let hourIndex = Index.getIndexString("1h", new Date(parseInt(key) * 1000)) // Pond.js Index format. The hourIndex'th hour since Unix epoch.
+  /**
+   * Function to format dateObject into pondjs IndexedEvent data which specifies events over a time range.
+   * See https://esnet-pondjs.appspot.com/#/indexedevent
+   * 
+   * @param {dateObject} See createHoursObject/createDaysObject 
+   * @returns {TimeSeries} formatted pond.js TimeSeries data. see https://esnet-pondjs.appspot.com/#/timeseries
+   */
+  formatObjectToTimeSeriesData = (dateObject) => {
+    let eventsArr = Object.keys(dateObject).map(key => { // each key as timestamp.
+      // e.g. IndexedEvent(1d-1565, 1) 1d-1565 is the entire duration of the 1565th day since the UNIX epoch, value of the event is 1.
       return new IndexedEvent(
-        Index.getIndexString(this.state.seeDays ? "1d" : "1h", new Date(parseInt(key) * 1000))
-        , hoursObject[key] ? 1 : 0)
+        Index.getIndexString( // supply an index string see https://esnet-pondjs.appspot.com/#/index
+          this.state.seeDays ? "1d" : "1h",
+          new Date(parseInt(key) * 1000) // unix timestamp in ms.
+        )
+        , dateObject[key] ? 1 : 0)
     })
 
     return new TimeSeries({
@@ -98,9 +119,9 @@ export default class Graph extends React.Component {
   }
 
   /**
-   * Function to retireve the validated blocks until it reaches the display start date. Since we iterate over the validated block we need to get them until the displayStartDate or earlier than the displayDtartDate. If for example the last block retrieved was 2 hours before the displayStartDate then we can't know if the validator was validating within those blocks. To ensure we either need to get the blocks in that interval and see it was validating, or get some blocks e.g. 5 hours before which lets us conclide the node was not validating between those 5-2=3 hours. 
+   * Function to retireve the validated blocks for the next page.
    * 
-  @returns {Array} array of concatenated validated blocks.
+   * @returns {Array} array of concatenated validated blocks.
    */
   getBlocksBefore = async () => {
     let tempPage = this.state.page;
@@ -113,12 +134,16 @@ export default class Graph extends React.Component {
   }
 
   /**
-   * @function to a date object with 1 hour interval to be iterated and checked if there exist a validated block in the given interval.
+   * @function createHoursObject to create a date object with keys as timestamps each 1 hour apart
+   * from startDate until endDate. Values are bool values, set to false. Object returned from this 
+   * function will be iterated to mark true/false if there exists a block within this interval.
    * 
    * @param {String} startDate 
    * @param {String} endDate 
-   * @returns {Object} an object with keys as unix timestamps from startDate to endDate, each 1 hour apart, and values as false. e.g.:
+   * @returns {Object} an object with keys as unix timestamps from startDate to endDate, each 1 hour apart, and values as false. 
    * 
+   * @example
+   * returns
    * { 1604915869: false ,1605002269: false...}
    * 
    * which would in ISO format be 
@@ -127,49 +152,56 @@ export default class Graph extends React.Component {
    */
   createHoursObject = (startDate, endDate) => {
     let dateObj = {};
-    let currentDate = moment(startDate).startOf('hour').unix();
-    let stopDate = moment(endDate).startOf('hour').unix();
+    let currentDate = moment.utc(startDate).startOf('hour').unix();
+    let stopDate = moment.utc(endDate).startOf('hour').unix();
     while (currentDate <= stopDate) {
       // for (let i = 0; i < 5; i++) {
       dateObj[currentDate] = false;
-      currentDate = moment.unix(currentDate).add(1, 'hours').unix();
+      currentDate = moment.unix(currentDate).utc().add(1, 'hours').unix();
     }
     return dateObj;
   }
 
+  // See createHoursObject.
   createDaysObject = (startDate, endDate) => {
     let dateObj = {};
-    let currentDate = moment(startDate).startOf('days').unix();
+    let currentDate = moment.utc(startDate).startOf('days').unix();
     console.log('Starting: ', currentDate)
-    let stopDate = moment(endDate).startOf('days').unix();
+    let stopDate = moment.utc(endDate).startOf('days').unix();
     console.log('Stopping: ', stopDate);
     while (currentDate <= stopDate) {
       // for (let i = 0; i < 5; i++) {
       dateObj[currentDate] = false;
-      currentDate = moment.unix(currentDate).add(1, 'days').unix();
+      currentDate = moment.unix(currentDate).utc().add(1, 'days').unix();
     }
     return dateObj;
   }
 
   /**
-   * @function that iterates over the blocks validated by the validator and marks the corresponding entry in the hoursObject true. To do that strips away minutes and seconds from the validated block's timestamp and marks the key in the hoursObject true. Checks if the key is already in the object before to avoid adding entries outside the interval of the hoursObject. 
+   * @function iterateValidatedBlocks that iterates over the blocks fetched from the blockexplorer and marks the corresponding time intervals in the dateObject true.
    * 
-   * Does not return anything since hoursObject, as an object, is passed by reference.
+   * To do that strips away minutes and seconds (and hours if seeDays === true) from the 
+   * validated block's timestamp and marks the key in the dateObject true. 
    * 
-   * @param {Array} blocksArray Array of blocks validated by the validator 
-   * @param {Object} hoursObject object created by the @function createHoursObject
+   * Marks only the keys that already exist in the dateObject true to avoid creating new 
+   * keys outside the dateObject interval.
+   * 
+   * Does not return anything since dateObject, as an object, is passed by reference.
+   * 
+   * @param {Array} blocksArray Array of blocks validated by the validator from the blockexplorer.
+   * @param {Object} dateObject object created by the createHoursObject or createDaysObject
    */
   iterateValidatedBlocks = (blocksArray, dateObject) => {
     for (let block of blocksArray) {
       let blockDateISO = block.timeStamp;
-      let blockDateWithStartOfUnix = this.state.seeDays ? moment(blockDateISO).startOf('day').unix() : moment(blockDateISO).startOf('hour').unix();
+      let blockDateWithStartOfUnix = this.state.seeDays ? moment.utc(blockDateISO).startOf('day').unix() : moment.utc(blockDateISO).startOf('hour').unix();
       if (dateObject[blockDateWithStartOfUnix] !== undefined) {
         dateObject[blockDateWithStartOfUnix] = true;
       }
     }
   }
 
-  handleGoBackDisplayDays = () => {
+  loadBefore = () => {
     this.setState({ isLoadingMore: true })
     this.getBlocksBefore()
       .then(this.blocksToTimeseries)
@@ -183,13 +215,15 @@ export default class Graph extends React.Component {
   }
 
   handleMouseOverIndexedEvent = e => {
-    let date = moment(e.timestamp());
+    let date = moment.utc(e.timestamp());
     let dateStr = this.state.seeDays ? date.format('DD MMM YYYY') : date.format('D MMM YY HH:mm') + date.add(1, 'hour').format('-HH:mm');
     let infoStr = e.get('value') ? 'online' : 'offline';
-    this.setState({ hoveredDate: dateStr, hoveredStatus: infoStr })
+    this.setState({ hoveredDate: dateStr + ' UTC', hoveredStatus: infoStr })
   };
 
   render() {
+
+    // To add title to each Graph.
     const withTitle = (children) =>
       <Container fluid>
         <Row>
@@ -217,6 +251,8 @@ export default class Graph extends React.Component {
         'Loading validators...'
       );
 
+
+    // Style function for the EventChart
     function styleFunc(event, state) {
       const color = event.get('value') ? 'green' : 'red';
       switch (state) {
@@ -270,7 +306,7 @@ export default class Graph extends React.Component {
         }
 
         <Row className='d-flex justify-content-between'>
-          <Button size='sm' onClick={this.handleGoBackDisplayDays}>
+          <Button size='sm' onClick={this.loadBefore}>
             {
               this.state.isLoadingMore
                 ? <Spinner animation="border" role="status" size='sm' />

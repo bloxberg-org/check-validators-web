@@ -95,7 +95,7 @@ export default function ValidatorList({ validators, lastBlocks, onlineCount14d, 
  * Component representing a row in the validators table
  * If lastBlock is falsey, renders a spinner. Otherwise renders a checkmark or crossmark if the last block is within 24 hours and 14 days for each cell. 
  */
-function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValidator, addedToGraph, name, setInstituteName, key }) {
+function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValidator, addedToGraph, name, setInstituteName }) {
   // Get institute name upon mounting.
   useEffect(() => {
     if (!name) {
@@ -107,7 +107,7 @@ function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValida
 
   return (
     <tr>
-      {/* Show the name. */}
+      {/* Show spinner until name is fetched. */}
       <td>
         {
           name ?
@@ -121,7 +121,7 @@ function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValida
       <td>
         <a style={{ color: 'inherit' }} href={`https://blockexplorer.bloxberg.org/address/${address}/validations`} target="_blank" rel="noopener noreferrer">{address}</a>
       </td>
-      {/* Check if last block within 24 hours */}
+      {/* Check if last block within 24 hours. Show spinner until fetched. */}
       <td>
         <div className="d-flex justify-content-center">
           {
@@ -131,7 +131,7 @@ function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValida
           }
         </div>
       </td>
-      {/* Check if last block within 14 days */}
+      {/* Check if last block within 14 days. Show spinner until fetched. */}
       <td>
         <div className="d-flex justify-content-center">
           {

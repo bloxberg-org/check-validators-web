@@ -14,10 +14,18 @@ import ValidatorsList from './ValidatorList';
 
 function App() {
   const [validators, setValidators] = useState([]);
+  // List of validators to be shown on the graph.
   const [graphValidators, setGraphValidators] = useState([]);
+  /**
+   * lastBlocks: {
+   *   0xaA84378...FbEBFC8: <Date>,
+   *   0x841C25A...b65A79b: <Date:
+   * }
+   */
   const [lastBlocks, setLastBlocks] = useState({});
   const [onlineCount24h, setOnlineCount24h] = useState();
   const [onlineCount14d, setOnlineCount14d] = useState();
+  // Keep raw data from Graphs to avoid having to fetch data again when going back to /Graph. Graph will just render data fetched and saved here.
   const [blockData, setBlocksData] = useState({});
   const [validatorNames, setValidatorNames] = useState({});
 
@@ -36,6 +44,7 @@ function App() {
           for (let addr of validators) {
             // console.log("Checking last block of " + addr);
             try {
+              // getLastBlock needs to run sequentially and takes time because of API rate limits of the blockexplorer
               let lastBlockDate = await getLastBlock(addr);
               if (isWithin14d(lastBlockDate))
                 count14d++
@@ -56,10 +65,6 @@ function App() {
         checkLastBlocks();
       })
   }, [])
-
-  useEffect(() => {
-
-  }, [validators]);
 
   const addGraphValidator = (validatorAddr) => {
     setGraphValidators(prevState => [...prevState, validatorAddr]);
