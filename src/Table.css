@@ -37,8 +37,8 @@ table th:last-child {
 table tr:first-child th {
   border-top: none;
   padding-top: 64px;
-  background-color: rebeccapurple;
-  color: white;
+  background-color: var(--primary);
+  color: rgb(233, 233, 233);
 }
 
 table tr:last-child td {
