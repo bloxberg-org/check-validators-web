@@ -4,6 +4,18 @@
   border: none;
 }
 
+.table td {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.last-seen {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 table td:first-child {
   border-left: none;
 }
@@ -14,14 +26,19 @@ table td:last-child {
 
 table th:first-child {
   border-left: none;
+  border-top-left-radius: 16px;
 }
 
 table th:last-child {
   border-right: none;
+  border-top-right-radius: 16px;
 }
 
 table tr:first-child th {
   border-top: none;
+  padding-top: 64px;
+  background-color: rebeccapurple;
+  color: white;
 }
 
 table tr:last-child td {

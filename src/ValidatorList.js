@@ -1,4 +1,5 @@
 import { PlusIcon, TrashIcon } from '@primer/octicons-react';
+import moment from 'moment';
 import React, { useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import Col from 'react-bootstrap/Col';
@@ -25,6 +26,7 @@ export default function ValidatorList({ validators, lastBlocks, onlineCount14d, 
             <th>Address</th>
             <th>Online in 24h?</th>
             <th>Online in 14 days?</th>
+            <th>Last seen online</th>
             <th>Show in graph</th>
           </tr>
         </thead>
@@ -112,7 +114,7 @@ function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValida
         {
           name ?
             name :
-            <div className="d-flex justify-content-center">
+            <div className="d-flex justify-content-center align-items-center">
               <Spinner animation="border" size='sm' />
             </div>
         }
@@ -123,7 +125,7 @@ function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValida
       </td>
       {/* Check if last block within 24 hours. Show spinner until fetched. */}
       <td>
-        <div className="d-flex justify-content-center">
+        <div className="d-flex justify-content-center align-items-center">
           {
             lastBlock ?
               getEmoji(isWithin24h(lastBlock)) :
@@ -133,7 +135,7 @@ function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValida
       </td>
       {/* Check if last block within 14 days. Show spinner until fetched. */}
       <td>
-        <div className="d-flex justify-content-center">
+        <div className="d-flex justify-content-center align-items-center">
           {
             lastBlock === 0 ? '?' : // If fetch fails show '?'
               lastBlock ?
@@ -142,7 +144,19 @@ function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValida
           }
         </div>
       </td>
+      {/* Show last seen */}
       <td>
+        <div className="text-center last-seen">
+          <div>
+            {moment.utc(lastBlock).format('DD MMM YYYY')}
+          </div>
+          <div>
+            {moment.utc(lastBlock).format('HH:mm') + ' UTC'}
+          </div>
+
+        </div>
+      </td>
+      <td className="text-center">
         {addedToGraph
           ? <Button onClick={removeGraphValidator} variant="danger" style={{ borderRadius: '8px' }}>
             <TrashIcon size={16} />
