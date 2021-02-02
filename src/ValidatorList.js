@@ -24,10 +24,10 @@ export default function ValidatorList({ validators, lastBlocks, onlineCount14d, 
           <tr>
             <th>Institute Name</th>
             <th>Address</th>
-            <th>Online in 24h?</th>
-            <th>Online in 14 days?</th>
-            <th>Last seen online</th>
-            <th>Show in graph</th>
+            <th className='text-center'>Online in 24h?</th>
+            <th className='text-center'>Online in 14 days?</th>
+            <th className='text-center'>Last seen online</th>
+            <th className='text-center'>Show in graph</th>
           </tr>
         </thead>
         <tbody>
@@ -147,13 +147,18 @@ function InstituteRow({ address, lastBlock, addGraphValidator, removeGraphValida
       {/* Show last seen */}
       <td>
         <div className="text-center last-seen">
-          <div>
-            {moment.utc(lastBlock).format('DD MMM YYYY')}
-          </div>
-          <div>
-            {moment.utc(lastBlock).format('HH:mm') + ' UTC'}
-          </div>
-
+          {
+            lastBlock
+              ? <div>
+                <div>
+                  {moment.utc(lastBlock).format('DD MMM YYYY')}
+                </div>
+                <div>
+                  {moment.utc(lastBlock).format('HH:mm') + ' UTC'}
+                </div>
+              </div>
+              : <Spinner animation="border" size='sm' />
+          }
         </div>
       </td>
       <td className="text-center">
