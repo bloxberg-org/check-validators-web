@@ -1,10 +1,14 @@
 FROM node:12.14.1-buster
 
 # Create and cd the directory
-WORKDIR /home/node/app
+WORKDIR /home/node/server
+
+COPY package.json ./
+
+RUN npm install
+
 COPY . .
 
-EXPOSE 3000
-RUN npm install -g forever && npm install --production 
+EXPOSE 9000
 
-CMD ["forever", "-l", "logFile.log", "-o", "out.log", "-e", "err.log", "server.js"]
+CMD ["npm", "start"]
