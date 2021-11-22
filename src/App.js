@@ -35,17 +35,15 @@ function App() {
   // Keep raw data from Graphs to avoid having to fetch data again when going back to /Graph. Graph will just render data fetched and saved here.
   const [blockData, setBlocksData] = useState({})
   const [validatorNames, setValidatorNames] = useState({})
-  const port = process.env.SERVER_PORT
-  const host = process.env.SERVER_HOST
+
   const URL =
     (process.env.NODE_ENV === 'development'
-      ? 'http://' + host + ':' + port
+      ? 'http://localhost:9000'
       : window.location.origin) + '/api'
 
-  console.log('URL', URL)
+  console.log('URL------------', URL)
   useEffect(() => {
     axios.get(URL + '/validators').then((res) => {
-      console.log('responseresponseresponseresponse', res)
       let count24h = 0
       let count14d = 0
       let alladr = []
