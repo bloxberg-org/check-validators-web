@@ -54,6 +54,8 @@ const validatorRoutes = require('./routes/validatorDetails')
 
 app.use('/api/validators', validatorRoutes)
 
+app.get('/', validatorRoutes)
+
 let validatorsAddr = []
 
 const getInstituteName = (address) => {
