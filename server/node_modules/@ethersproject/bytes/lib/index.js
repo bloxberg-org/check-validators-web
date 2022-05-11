@@ -22,6 +22,9 @@ function isBytesLike(value) {
     return ((isHexString(value) && !(value.length % 2)) || isBytes(value));
 }
 exports.isBytesLike = isBytesLike;
+function isInteger(value) {
+    return (typeof (value) === "number" && value == value && (value % 1) === 0);
+}
 function isBytes(value) {
     if (value == null) {
         return false;
@@ -32,12 +35,12 @@ function isBytes(value) {
     if (typeof (value) === "string") {
         return false;
     }
-    if (value.length == null) {
+    if (!isInteger(value.length) || value.length < 0) {
         return false;
     }
     for (var i = 0; i < value.length; i++) {
         var v = value[i];
-        if (typeof (v) !== "number" || v < 0 || v >= 256 || (v % 1)) {
+        if (!isInteger(v) || v < 0 || v >= 256) {
             return false;
         }
     }
@@ -70,7 +73,7 @@ function arrayify(value, options) {
         var hex = value.substring(2);
         if (hex.length % 2) {
             if (options.hexPad === "left") {
-                hex = "0x0" + hex.substring(2);
+                hex = "0" + hex;
             }
             else if (options.hexPad === "right") {
                 hex += "0";
@@ -282,17 +285,28 @@ function splitSignature(signature) {
         s: "0x",
         _vs: "0x",
         recoveryParam: 0,
-        v: 0
+        v: 0,
+        yParityAndS: "0x",
+        compact: "0x"
     };
     if (isBytesLike(signature)) {
         var bytes = arrayify(signature);
-        if (bytes.length !== 65) {
-            logger.throwArgumentError("invalid signature string; must be 65 bytes", "signature", signature);
-        }
         // Get the r, s and v
-        result.r = hexlify(bytes.slice(0, 32));
-        result.s = hexlify(bytes.slice(32, 64));
-        result.v = bytes[64];
+        if (bytes.length === 64) {
+            // EIP-2098; pull the v from the top bit of s and clear it
+            result.v = 27 + (bytes[32] >> 7);
+            bytes[32] &= 0x7f;
+            result.r = hexlify(bytes.slice(0, 32));
+            result.s = hexlify(bytes.slice(32, 64));
+        }
+        else if (bytes.length === 65) {
+            result.r = hexlify(bytes.slice(0, 32));
+            result.s = hexlify(bytes.slice(32, 64));
+            result.v = bytes[64];
+        }
+        else {
+            logger.throwArgumentError("invalid signature string", "signature", signature);
+        }
         // Allow a recid to be used as the v
         if (result.v < 27) {
             if (result.v === 0 || result.v === 1) {
@@ -355,8 +369,11 @@ function splitSignature(signature) {
             if (result.v == null) {
                 result.v = 27 + result.recoveryParam;
             }
-            else if (result.recoveryParam !== (1 - (result.v % 2))) {
-                logger.throwArgumentError("signature recoveryParam mismatch v", "signature", signature);
+            else {
+                var recId = (result.v === 0 || result.v === 1) ? result.v : (1 - (result.v % 2));
+                if (result.recoveryParam !== recId) {
+                    logger.throwArgumentError("signature recoveryParam mismatch v", "signature", signature);
+                }
             }
         }
         if (result.r == null || !isHexString(result.r)) {
@@ -393,6 +410,8 @@ function splitSignature(signature) {
             logger.throwArgumentError("signature _vs mismatch v and s", "signature", signature);
         }
     }
+    result.yParityAndS = result._vs;
+    result.compact = result.r + result.yParityAndS.substring(2);
     return result;
 }
 exports.splitSignature = splitSignature;

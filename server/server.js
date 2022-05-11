@@ -20,7 +20,7 @@ const db = mongoose.connection
 db.on('error', (err) => {
   console.log('> error occurred from the database', err)
 })
-db.once('open', () => {
+db.on('open', () => {
   console.log('> successfully opened the database')
 })
 
@@ -92,11 +92,15 @@ const getLastBlock = (address) => {
     )
     .then((res) => {
       let finalData = {}
-      let datedata = res.data.result[0].timeStamp
-      ;(finalData.lastseenonline = datedata),
-        (finalData.onlinein24h = isWithin24h(datedata))
-      finalData.onlinein14d = isWithin14d(datedata)
-      return finalData
+      if (res.data.result[0]) {
+        let datedata = res.data.result[0].timeStamp
+        ;(finalData.lastseenonline = datedata),
+          (finalData.onlinein24h = isWithin24h(datedata))
+        finalData.onlinein14d = isWithin14d(datedata)
+        return finalData
+      } else {
+        return true
+      }
     })
 }
 
