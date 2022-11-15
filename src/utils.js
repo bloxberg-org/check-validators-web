@@ -47,7 +47,7 @@ export function getInstituteName(address) {
 export function getLastBlock(address) {
   console.log('Asking the last block for ' + address)
   return fetch(
-    'https://blockexplorer.bloxberg.org/api/api?module=account&action=getminedblocks&address=' +
+    'https://blockexplorer.bloxberg.org/api?module=account&action=getminedblocks&address=' +
       address +
       '&page=1&offset=1',
   )
@@ -111,7 +111,7 @@ export function getEmoji(bool) {
 export function getBlocks(addr, page = 1, offset = 1000) {
   console.log('Getting blocks for ' + addr)
   return fetch(
-    `https://blockexplorer.bloxberg.org/api/api?module=account&action=getminedblocks&address=${addr}&page=${page}&offset=${offset}`,
+    `https://blockexplorer.bloxberg.org/api?module=account&action=getminedblocks&address=${addr}&page=${page}&offset=${offset}`,
   )
     .then((res) => res.json())
     .then((json) => json.result)

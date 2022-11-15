@@ -7,6 +7,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
   width: 100%;
+  background-color: #29404f;
 }
 
 html {
@@ -31,5 +32,42 @@ code {
 }
 
 .navbar {
-  padding: 1rem 2.5rem
+  padding: 1rem 1rem;
+  background-color: #1c2b36;
+  border-color: #29404f;
+  justify-content: center;
+  margin-left: -8rem;
+}
+
+.nav-link {
+  line-height: 60px;
+  height: 60px;
+  padding: 3px 20px 0px 20px;
+  width: auto;
+  display: block;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: left;
+  text-decoration: none;
+  border: 0;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: bold;
+  outline: none;
+  padding-right: 2rem !important;
+  padding-left: 2rem !important;
+  color: #eaeaea !important;
+}
+
+.active {
+  color: #e01d6c !important;
+}
+
+.nav-link:hover {
+  color: #e01d6c !important;
+}
+
+.navbar-nav {
+  padding-right: 320px !important;
 }

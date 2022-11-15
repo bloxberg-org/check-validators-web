@@ -8,6 +8,12 @@ import Row from 'react-bootstrap/Row'
 import Spinner from 'react-bootstrap/Spinner'
 import Table from 'react-bootstrap/Table'
 import './Table.css'
+import check from './check.svg'
+import wrong from './cross.svg'
+import remove from './delete.svg'
+import add from './add.svg'
+import diamond from './diamond.png'
+
 import { getEmoji, getInstituteName, isWithin14d, isWithin24h } from './utils'
 
 export default function ValidatorList({
@@ -67,10 +73,11 @@ export default function ValidatorList({
 
   return (
     <Container>
-      <Row className="d-flex justify-content-center my-2">
-        <h1>Bloxberg Validators Web Monitor</h1>
+      <Row className="text d-flex justify-content-center my-2">
+      <img className="sw-diamond" src={diamond} alt="" />
+        <h1 class="sectionTitle">bloxberg Validators status</h1>
       </Row>
-      <Row className="justify-content-center text-center m-2">
+      {/* <Row className="text justify-content-center text-center m-2">
         Here you can see the authority nodes in the&nbsp;
         <a href="https://bloxberg.org">bloxberg</a>&nbsp;network.
       </Row>
@@ -78,18 +85,18 @@ export default function ValidatorList({
         Loading the validator statuses takes a little time and runs
         sequentially.
       </Row>
-      <Row className="justify-content-center text-center m-2">
+      <Row className="text justify-content-center text-center m-2">
         Choose validators to view in &nbsp;
         <strong>detailed uptime graph</strong>&nbsp; by clicking &nbsp;
         <strong>+</strong>&nbsp; on the right and go to the &nbsp;
         <strong>Graph</strong>&nbsp; page above.
-      </Row>
+      </Row> */}
       <Row className="my-3">
         <Col>
-          <Row className="justify-content-center font-weight-bold">
+          <Row className="text justify-content-center font-weight-bold">
             Validators online in 24 hours
           </Row>
-          <Row className="justify-content-center">
+          <Row className="text justify-content-center">
             {onlineCount24h ? (
               `${onlineCount24h}/${validators.length}`
             ) : (
@@ -98,10 +105,10 @@ export default function ValidatorList({
           </Row>
         </Col>
         <Col>
-          <Row className="justify-content-center font-weight-bold">
+          <Row className="text justify-content-center font-weight-bold">
             Validators online in 14 days
           </Row>
-          <Row className="justify-content-center">
+          <Row className="text justify-content-center">
             {onlineCount24h ? (
               `${onlineCount14d}/${validators.length}`
             ) : (
@@ -111,7 +118,9 @@ export default function ValidatorList({
         </Col>
       </Row>
       <Row>
-        <Col className="d-flex justify-content-center">{validatorTable}</Col>
+        <Col className="text d-flex justify-content-center">
+          {validatorTable}
+        </Col>
       </Row>
     </Container>
   )
@@ -166,7 +175,11 @@ function InstituteRow({
       <td>
         <div className="d-flex justify-content-center align-items-center">
           {lastBlock ? (
-            getEmoji(isWithin24h(lastBlock))
+            isWithin24h(lastBlock) ? (
+              <img src={check} height="30px" />
+            ) : (
+              <img src={wrong} height="30px" />
+            )
           ) : (
             <Spinner animation="border" size="sm" />
           )}
@@ -178,7 +191,11 @@ function InstituteRow({
           {lastBlock === 0 ? (
             '?' // If fetch fails show '?'
           ) : lastBlock ? (
-            getEmoji(isWithin14d(lastBlock))
+            isWithin14d(lastBlock) ? (
+              <img src={check} height="30px" />
+            ) : (
+              <img src={wrong} height="30px" />
+            )
           ) : (
             <Spinner animation="border" size="sm" />
           )}
@@ -201,18 +218,16 @@ function InstituteRow({
         {addedToGraph ? (
           <Button
             onClick={removeGraphValidator}
-            variant="danger"
-            style={{ borderRadius: '8px' }}
+            style={{ all: 'unset'}}
           >
-            <TrashIcon size={16} />
+             <img src={remove} height="37px" />
           </Button>
         ) : (
           <Button
             onClick={addGraphValidator}
-            variant="primary"
-            style={{ borderRadius: '8px' }}
+            style={{ all: 'unset'}}
           >
-            <PlusIcon size={16} />
+             <img src={add} height="37px" />
           </Button>
         )}
       </td>

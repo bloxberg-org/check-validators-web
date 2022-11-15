@@ -271,7 +271,7 @@ export default class Graph extends React.Component {
 
     // Style function for the EventChart
     function styleFunc(event, state) {
-      const color = event.get('value') ? 'green' : 'red'
+      const color = event.get('value') ? '#2dcf96' : '#ff4848'
       switch (state) {
         case 'normal':
           return {
@@ -324,7 +324,11 @@ export default class Graph extends React.Component {
         ) : null}
 
         <Row className="d-flex justify-content-between">
-          <Button size="sm" onClick={this.loadBefore}>
+          <Button
+            style={{ backgroundColor: '#1c2b36', borderColor: '#1c2b36' }}
+            size="sm"
+            onClick={this.loadBefore}
+          >
             {this.state.isLoadingMore ? (
               <Spinner animation="border" role="status" size="sm" />
             ) : (
@@ -332,8 +336,8 @@ export default class Graph extends React.Component {
             )}
           </Button>
           <Button
-            variant="outline-primary"
             size="sm"
+            style={{ backgroundColor: '#1c2b36', borderColor: '#1c2b36' }}
             onClick={this.handleToggleDaysHours}
           >
             Toggle days/hours

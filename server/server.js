@@ -4,6 +4,19 @@ var morgan = require('morgan')
 const axios = require('axios')
 var cors = require('cors')
 const schedule = require('node-schedule')
+var async = require('async')
+var http = require('http')
+var https = require('https')
+
+// test for keep me alive
+
+const httpAgent = new http.Agent({ keepAlive: true })
+const httpsAgent = new https.Agent({ keepAlive: true })
+
+const axioInstance = axios.create({
+  httpAgent,
+  httpsAgent,
+})
 
 // ====== Main config  ========
 
@@ -88,9 +101,10 @@ const getLastBlock = (address) => {
   console.log('Asking the last block for ' + address)
   return axios
     .get(
-      'https://blockexplorer.bloxberg.org/api/api?module=account&action=getminedblocks&address=' +
+      'https://blockexplorer.bloxberg.org/api?module=account&action=getminedblocks&address=' +
         address +
         '&page=1&offset=1',
+      { httpsAgent },
     )
     .then((res) => {
       let finalData = {}
@@ -104,53 +118,84 @@ const getLastBlock = (address) => {
         return true
       }
     })
+    .catch(function (error) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log(error.response.data)
+        console.log(error.response.status)
+        console.log(error.response.headers)
+      } else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        console.log(error.request)
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', error.message)
+      }
+      console.log(error.config)
+    })
 }
 
 const getValidatorsList = async () => {
   // console.log('Getting validator list from bloxberg Smart Contract')
   let allAddress = await contract.methods.getValidators().call()
   validatorsAddr = allAddress
-  for (let addr of allAddress) {
-    // let data = await getLastBlock(addr)
-    // console.log('data', data)
-    NodeValidatorDetails.findById(addr).then((validatorNode) => {
-      if (!validatorNode) {
-        getInstituteName(addr).then((fetchedName) => {
-          let saveValidatorDetails = new NodeValidatorDetails({
-            _id: addr,
-            name: fetchedName,
-          })
-          saveValidatorDetails
-            .save()
-            .then(() => {
-              console.log('Successfully saved the data')
-            })
-            .catch((err) => console.log(err))
+  async.waterfall(
+    [
+      function firstStep(done) {
+        NodeValidatorDetails.deleteMany({}, function (err, result) {
+          done(null, 'cleared database')
         })
-      }
-    })
-  }
-  saveLoginDetails()
-  return allAddress
-}
-
-const saveLoginDetails = async () => {
-  if (validatorsAddr) {
-    for (let addr of validatorsAddr) {
-      let lastblkdata = await getLastBlock(addr)
-      NodeValidatorDetails.findOne({ _id: addr })
-        .then((data) => {
-          // if (!data.lastseenonline) {
-          NodeValidatorDetails.updateOne({ _id: addr }, lastblkdata)
+      },
+      function secondStep(step1Result, done) {
+        console.log(step1Result)
+        for (let addr of allAddress) {
+          NodeValidatorDetails.findById(addr).then((validatorNode) => {
+            if (!validatorNode) {
+              getInstituteName(addr).then((fetchedName) => {
+                let saveValidatorDetails = new NodeValidatorDetails({
+                  _id: addr,
+                  name: fetchedName,
+                })
+                saveValidatorDetails
+                  .save()
+                  .then(() => {
+                    // console.log('Successfully saved the data')
+                  })
+                  .catch((err) => console.log(err))
+              })
+            }
+          })
+        }
+        done(null, 'Successfully saved the data')
+      },
+      async function ThirdStep(step2Result) {
+        console.log(step2Result)
+        for (let addr of validatorsAddr) {
+          let lastblkdata = await getLastBlock(addr)
+          // console.log('Updating lastblkdata for ' + addr + ': ' + lastblkdata)
+          NodeValidatorDetails.findOne({ _id: addr })
             .then((data) => {
-              // console.log('datadatadatadata', data)
+              NodeValidatorDetails.updateOne({ _id: addr }, lastblkdata)
+                .then((data) => {
+                  // console.log('Update complete: ', data)
+                })
+                .catch((err) => console.log('Err', err))
             })
             .catch((err) => console.log('Err', err))
-          // }
-        })
-        .catch((err) => console.log('Err', err))
-    }
-  }
+        }
+      },
+    ],
+    function (err) {
+      if (err) {
+        throw new Error(err)
+      } else {
+        console.log('No error happened in any steps, operation done!')
+      }
+    },
+  )
 }
 
 getValidatorsList()

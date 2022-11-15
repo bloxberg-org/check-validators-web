@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "agentkeepalive": "^4.2.1",
     "async": "^3.2.1",
     "axios": "^0.21.4",
     "body-parser": "^1.19.0",
@@ -17,6 +18,8 @@
     "cors": "^2.8.5",
     "cronstrue": "^1.117.0",
     "express": "^4.17.1",
+    "http": "0.0.1-security",
+    "https": "^1.0.0",
     "mongoose": "^6.0.8",
     "morgan": "^1.10.0",
     "node-fetch": "^3.0.0",
