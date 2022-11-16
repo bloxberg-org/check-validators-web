@@ -26,7 +26,7 @@ export const getValidatorsList = () => {
  * @returns {String} Research institute name of the validator given in metadata contract. 'N/A' if the address is not within authoritized validators.
  */
 export function getInstituteName(address) {
-  console.log('Getting institute name of ' + address)
+  // console.log('Getting institute name of ' + address)
   return metaDataContract.methods
     .validatorsMetadata(address)
     .call()

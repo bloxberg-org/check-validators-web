@@ -36,102 +36,80 @@ function App() {
   const [blockData, setBlocksData] = useState({})
   const [validatorNames, setValidatorNames] = useState({})
 
-  const URL =
-    (process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3000'
-      : window.location.origin) + '/api'
+  var API_URI = 'https://' + process.env.REACT_APP_API_HOST_PROD
+
+  if (process.env.NODE_ENV === 'development') {
+    API_URI = 'http://localhost:3000'
+  } else if (process.env.NODE_ENV === 'test') {
+    API_URI = 'https://' + process.env.REACT_APP_API_HOST_QA
+  }
+
+  const URL = API_URI + '/api'
 
   useEffect(() => {
-    // axios.get(URL + '/validators').then((res) => {
-    //   console.log('resresres', res)
-    //   let count24h = 0
-    //   let count14d = 0
-    //   let alladr = []
-    //   if (!res.data[0].lastseenonline) {
-    //     getValidatorsList()
-    //       .then((arr) => {
-    //         console.log('Getting validtors', arr)
-    //         setValidators(arr)
-    //         return arr
-    //       })
-    //       .then((validators) => {
-    //         console.log('Checking last blocks')
-    //         async function checkLastBlocks() {
-    //           let count24h = 0
-    //           let count14d = 0
-    //           for (let addr of validators) {
-    //             // console.log("Checking last block of " + addr);
-    //             try {
-    //               // getLastBlock needs to run sequentially and takes time because of API rate limits of the blockexplorer
-    //               let lastBlockDate = await getLastBlock(addr)
-    //               if (isWithin14d(lastBlockDate)) count14d++
-    //               if (isWithin24h(lastBlockDate)) count24h++
-    //               setLastBlocks((oldObj) => {
-    //                 return { ...oldObj, [addr]: lastBlockDate }
-    //               })
-    //             } catch (err) {
-    //               setLastBlocks((oldObj) => {
-    //                 return { ...oldObj, [addr]: 0 }
-    //               })
-    //             }
-    //           }
-    //           setOnlineCount14d(count14d)
-    //           setOnlineCount24h(count24h)
-    //         }
-    //         checkLastBlocks()
-    //       })
-    //   } else {
-    //     for (let alldata of res.data) {
-    //       if (alldata.lastseenonline) {
-    //         alladr.push(alldata._id)
-    //         setLastBlocks((oldObj) => {
-    //           return { ...oldObj, [alldata._id]: alldata.lastseenonline }
-    //         })
-    //         if (alldata.onlinein14d) {
-    //           count14d++
-    //         }
-    //         if (alldata.onlinein24h) {
-    //           count24h++
-    //         }
-    //       }
-    //     }
-    //     setValidators(alladr)
-    //     setOnlineCount14d(count14d)
-    //     setOnlineCount24h(count24h)
-    //   }
-    // })
-    getValidatorsList()
-      .then((arr) => {
-        console.log('Getting validtors', arr)
-        setValidators(arr)
-        return arr
-      })
-      .then((validators) => {
-        console.log('Checking last blocks')
-        async function checkLastBlocks() {
-          let count24h = 0
-          let count14d = 0
-          for (let addr of validators) {
-            // console.log("Checking last block of " + addr);
-            try {
-              // getLastBlock needs to run sequentially and takes time because of API rate limits of the blockexplorer
-              let lastBlockDate = await getLastBlock(addr)
-              if (isWithin14d(lastBlockDate)) count14d++
-              if (isWithin24h(lastBlockDate)) count24h++
-              setLastBlocks((oldObj) => {
-                return { ...oldObj, [addr]: lastBlockDate }
-              })
-            } catch (err) {
-              setLastBlocks((oldObj) => {
-                return { ...oldObj, [addr]: 0 }
-              })
+    axios.get(URL + '/validators').then((res) => {
+      // console.log('resresresres',res)
+      let count24h = 0
+      let count14d = 0
+      let alladr = []
+      if (!res.data[0].lastseenonline) {
+        getValidatorsList()
+          .then((arr) => {
+            console.log('Getting validtors', arr)
+            setValidators(arr)
+            return arr
+          })
+          .then((allValidators) => {
+            console.log('Checking last blocks')
+            async function checkLastBlocks() {
+              let count24h = 0
+              let count14d = 0
+              for (let addr of allValidators) {
+                // console.log("Checking last block of " + addr);
+                try {
+                  // getLastBlock needs to run sequentially and takes time because of API rate limits of the blockexplorer
+                  let lastBlockDate = await getLastBlock(addr)
+                  if (isWithin14d(lastBlockDate)) count14d++
+                  if (isWithin24h(lastBlockDate)) count24h++
+                  setLastBlocks((oldObj) => {
+                    return { ...oldObj, [addr]: lastBlockDate }
+                  })
+                } catch (err) {
+                  setLastBlocks((oldObj) => {
+                    return { ...oldObj, [addr]: 0 }
+                  })
+                }
+              }
+              setOnlineCount14d(count14d)
+              setOnlineCount24h(count24h)
+            }
+            checkLastBlocks()
+          })
+      } else {
+        console.log('res',res)
+
+        for (let alldata of res.data) {
+
+          if (alldata.lastseenonline) {
+
+            alladr.push(alldata._id)
+            setLastBlocks((oldObj) => {
+              return { ...oldObj, [alldata._id]: alldata.lastseenonline }
+            })
+            if (alldata.onlinein14d) {
+              count14d++
+            }
+            if (alldata.onlinein24h) {
+              count24h++
             }
           }
-          setOnlineCount14d(count14d)
-          setOnlineCount24h(count24h)
         }
-        checkLastBlocks()
-      })
+
+        setValidators(alladr)
+        setOnlineCount14d(count14d)
+        setOnlineCount24h(count24h)
+      }
+    })
   }, [])
 
   const addGraphValidator = (validatorAddr) => {
@@ -145,7 +123,7 @@ function App() {
   }
 
   const setInstituteName = useCallback((name, addr) => {
-    console.log('Setting institution name ' + name + ' ' + addr)
+    // console.log('Setting institution name ' + name + ' ' + addr)
     setValidatorNames((prevState) => ({ ...prevState, [addr]: name }))
   }, [])
 
@@ -163,12 +141,12 @@ function App() {
         <Nav>
           <Nav.Item>
             <LinkContainer to="/List">
-              <Nav.Link activeClassName="active">List</Nav.Link>
+              <Nav.Link activeclassname="active">List</Nav.Link>
             </LinkContainer>
           </Nav.Item>
           <Nav.Item>
             <LinkContainer to="/Graph">
-              <Nav.Link activeClassName="active">Graph</Nav.Link>
+              <Nav.Link activeclassname="active">Graph</Nav.Link>
             </LinkContainer>
           </Nav.Item>
         </Nav>
