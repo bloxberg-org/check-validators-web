@@ -145,12 +145,6 @@ const getValidatorsList = async () => {
   async.waterfall(
     [
       function firstStep(done) {
-        NodeValidatorDetails.deleteMany({}, function (err, result) {
-          done(null, 'cleared database')
-        })
-      },
-      function secondStep(step1Result, done) {
-        console.log(step1Result)
         for (let addr of allAddress) {
           NodeValidatorDetails.findById(addr).then((validatorNode) => {
             if (!validatorNode) {
@@ -171,8 +165,8 @@ const getValidatorsList = async () => {
         }
         done(null, 'Successfully saved the data')
       },
-      async function ThirdStep(step2Result) {
-        console.log(step2Result)
+      async function secondStep(step1Result) {
+        console.log(step1Result)
         for (let addr of validatorsAddr) {
           let lastblkdata = await getLastBlock(addr)
           // console.log('Updating lastblkdata for ' + addr + ': ' + lastblkdata)
@@ -198,12 +192,39 @@ const getValidatorsList = async () => {
   )
 }
 
+Array.prototype.diff = function (a) {
+  return this.filter(function (i) {
+    return a.indexOf(i) < 0
+  })
+}
+
+const cleanDb = async () => {
+  let allAddress = await contract.methods.getValidators().call()
+  NodeValidatorDetails.find({}, { _id: 1 })
+    .then((data) => {
+      let dbAddress = data.map(function (item) {
+        return item._id
+      })
+      let difference = dbAddress.filter((x) => !allAddress.includes(x))
+      if (difference.length !== 0) {
+        difference.map(function (id) {
+          NodeValidatorDetails.deleteMany({ _id: id }, (err, result) => {
+            console.log('Db cleaned successfully')
+          })
+        })
+      }
+    })
+    .catch((err) => console.log('Err', err))
+}
+
 getValidatorsList()
+cleanDb()
 
 // ====== Cron Job ========
 
 const cronstrue = require('cronstrue')
 const cronSchedule = '0 15 0 * * *'
+const cronScheduleForCleaning = '0 0 * * 0'
 
 console.log(
   'The script is scheduled to run ' +
@@ -213,4 +234,13 @@ console.log(
     }),
 )
 
+console.log(
+  'The script is scheduled to run cronScheduleForCleaning' +
+    cronstrue.toString(cronScheduleForCleaning, {
+      use24HourTimeFormat: true,
+      verbose: true,
+    }),
+)
+
 schedule.scheduleJob(cronSchedule, getValidatorsList)
+schedule.scheduleJob(cronScheduleForCleaning, cleanDb)
