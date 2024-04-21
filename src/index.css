@@ -32,11 +32,13 @@ code {
 }
 
 .navbar {
-  padding: 1rem 1rem;
+  padding: 1.5rem 1rem;
   background-color: #1c2b36;
   border-color: #29404f;
-  justify-content: center;
-  margin-left: -8rem;
+  justify-content: flex-start;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  padding-left: 20rem;
 }
 
 .nav-link {

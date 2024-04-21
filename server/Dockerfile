@@ -1,4 +1,4 @@
-FROM node:12.14.1-buster
+FROM node:14.20-alpine
 
 # Create and cd the directory
 WORKDIR /home/node/server

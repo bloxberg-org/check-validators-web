@@ -325,8 +325,8 @@ export default class Graph extends React.Component {
 
         <Row className="d-flex justify-content-between">
           <Button
-            style={{ backgroundColor: '#1c2b36', borderColor: '#1c2b36' }}
             size="sm"
+            style={{ backgroundColor: '#1c2b36', borderColor: '#1c2b36' }}
             onClick={this.loadBefore}
           >
             {this.state.isLoadingMore ? (
@@ -336,8 +336,8 @@ export default class Graph extends React.Component {
             )}
           </Button>
           <Button
-            size="sm"
             style={{ backgroundColor: '#1c2b36', borderColor: '#1c2b36' }}
+            size="sm"
             onClick={this.handleToggleDaysHours}
           >
             Toggle days/hours

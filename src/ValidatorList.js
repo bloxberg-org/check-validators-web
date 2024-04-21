@@ -1,20 +1,19 @@
-import { PlusIcon, TrashIcon } from '@primer/octicons-react'
-import moment from 'moment'
-import React, { useEffect } from 'react'
-import { Button } from 'react-bootstrap'
-import Col from 'react-bootstrap/Col'
-import Container from 'react-bootstrap/Container'
-import Row from 'react-bootstrap/Row'
-import Spinner from 'react-bootstrap/Spinner'
-import Table from 'react-bootstrap/Table'
-import './Table.css'
-import check from './check.svg'
-import wrong from './cross.svg'
-import remove from './delete.svg'
-import add from './add.svg'
-import diamond from './diamond.png'
+import moment from "moment";
+import React from "react";
+import { Button } from "react-bootstrap";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Spinner from "react-bootstrap/Spinner";
+import Table from "react-bootstrap/Table";
+import "./Table.css";
+import check from "./check.svg";
+import wrong from "./cross.svg";
+import remove from "./delete.svg";
+import add from "./add.svg";
+import diamond from "./diamond.png";
 
-import { getEmoji, getInstituteName, isWithin14d, isWithin24h } from './utils'
+import { isWithin14d, isWithin24h } from "./utils";
 
 export default function ValidatorList({
   validators,
@@ -24,20 +23,19 @@ export default function ValidatorList({
   addGraphValidator,
   removeGraphValidator,
   graphValidators,
-  setInstituteName,
   validatorNames,
 }) {
-  let validatorTable
+  let validatorTable;
   if (validators.length === 0) {
     validatorTable = (
       <Spinner
         animation="border"
         role="status"
-        style={{ width: '100px', height: '100px' }}
+        style={{ width: "100px", height: "100px" }}
       >
         <span className="sr-only">Loading...</span>
       </Spinner>
-    )
+    );
   } else {
     validatorTable = (
       <Table striped bordered hover variant="light">
@@ -45,8 +43,8 @@ export default function ValidatorList({
           <tr>
             <th>Institute Name</th>
             <th>Address</th>
-            <th className="text-center">Online in 24h?</th>
-            <th className="text-center">Online in 14 days?</th>
+            <th className="text-center">Online in 24h</th>
+            <th className="text-center">Online in 14 days</th>
             <th className="text-center">Last seen online</th>
             <th className="text-center">Show in graph</th>
           </tr>
@@ -60,24 +58,23 @@ export default function ValidatorList({
                 addedToGraph={graphValidators.includes(addr)}
                 addGraphValidator={() => addGraphValidator(addr)}
                 removeGraphValidator={() => removeGraphValidator(addr)}
-                setInstituteName={setInstituteName}
                 name={validatorNames[addr]}
                 key={i}
               />
-            )
+            );
           })}
         </tbody>
       </Table>
-    )
+    );
   }
 
   return (
     <Container>
       <Row className="text d-flex justify-content-center my-2">
-      <img className="sw-diamond" src={diamond} alt="" />
+        <img className="sw-diamond" src={diamond} alt="" />
         <h1 class="sectionTitle">bloxberg Validators status</h1>
       </Row>
-      {/* <Row className="text justify-content-center text-center m-2">
+      {/* <Row className="justify-content-center text-center m-2">
         Here you can see the authority nodes in the&nbsp;
         <a href="https://bloxberg.org">bloxberg</a>&nbsp;network.
       </Row>
@@ -85,7 +82,7 @@ export default function ValidatorList({
         Loading the validator statuses takes a little time and runs
         sequentially.
       </Row>
-      <Row className="text justify-content-center text-center m-2">
+      <Row className="justify-content-center text-center m-2">
         Choose validators to view in &nbsp;
         <strong>detailed uptime graph</strong>&nbsp; by clicking &nbsp;
         <strong>+</strong>&nbsp; on the right and go to the &nbsp;
@@ -123,7 +120,7 @@ export default function ValidatorList({
         </Col>
       </Row>
     </Container>
-  )
+  );
 }
 
 /**
@@ -137,17 +134,7 @@ function InstituteRow({
   removeGraphValidator,
   addedToGraph,
   name,
-  setInstituteName,
 }) {
-  // Get institute name upon mounting.
-  useEffect(() => {
-    if (!name) {
-      getInstituteName(address).then((fetchedName) => {
-        setInstituteName(fetchedName, address)
-      })
-    }
-  }, [setInstituteName, address, name])
-
   return (
     <tr>
       {/* Show spinner until name is fetched. */}
@@ -163,7 +150,7 @@ function InstituteRow({
       {/* Show the address */}
       <td>
         <a
-          style={{ color: 'inherit' }}
+          style={{ color: "inherit" }}
           href={`https://blockexplorer.bloxberg.org/address/${address}/validations`}
           target="_blank"
           rel="noopener noreferrer"
@@ -176,9 +163,9 @@ function InstituteRow({
         <div className="d-flex justify-content-center align-items-center">
           {lastBlock ? (
             isWithin24h(lastBlock) ? (
-              <img src={check} height="30px" />
+              <img src={check} height="30px" alt="" />
             ) : (
-              <img src={wrong} height="30px" />
+              <img src={wrong} height="30px" alt="" />
             )
           ) : (
             <Spinner animation="border" size="sm" />
@@ -189,12 +176,12 @@ function InstituteRow({
       <td>
         <div className="d-flex justify-content-center align-items-center">
           {lastBlock === 0 ? (
-            '?' // If fetch fails show '?'
+            "?" // If fetch fails show '?'
           ) : lastBlock ? (
             isWithin14d(lastBlock) ? (
-              <img src={check} height="30px" />
+              <img src={check} height="30px" alt="" />
             ) : (
-              <img src={wrong} height="30px" />
+              <img src={wrong} height="30px" alt="" />
             )
           ) : (
             <Spinner animation="border" size="sm" />
@@ -206,8 +193,8 @@ function InstituteRow({
         <div className="text-center last-seen">
           {lastBlock ? (
             <div>
-              <div>{moment.utc(lastBlock).format('DD MMM YYYY')}</div>
-              <div>{moment.utc(lastBlock).format('HH:mm') + ' UTC'}</div>
+              <div>{moment.utc(lastBlock).format("DD MMM YYYY")}</div>
+              <div>{moment.utc(lastBlock).format("HH:mm") + " UTC"}</div>
             </div>
           ) : (
             <Spinner animation="border" size="sm" />
@@ -216,21 +203,15 @@ function InstituteRow({
       </td>
       <td className="text-center">
         {addedToGraph ? (
-          <Button
-            onClick={removeGraphValidator}
-            style={{ all: 'unset'}}
-          >
-             <img src={remove} height="37px" />
+          <Button onClick={removeGraphValidator} style={{ all: "unset" }}>
+            <img src={remove} height="37px" alt="" />
           </Button>
         ) : (
-          <Button
-            onClick={addGraphValidator}
-            style={{ all: 'unset'}}
-          >
-             <img src={add} height="37px" />
+          <Button onClick={addGraphValidator} style={{ all: "unset" }}>
+            <img src={add} height="37px" alt="" />
           </Button>
         )}
       </td>
     </tr>
-  )
+  );
 }

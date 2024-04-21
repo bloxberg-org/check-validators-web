@@ -1,4 +1,4 @@
-FROM node:12.14.1-buster
+FROM node:14.20-alpine
 
 # Build args
 ARG REACT_APP_SERVER_PORT
