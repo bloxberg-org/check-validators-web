@@ -1,0 +1,64 @@
+version: '3'
+services:
+
+  check-validators-web-mongo:
+    image: mongo:4.2.3-bionic
+    container_name: check-validators-web-mongo
+    ports:
+      - "27019:27017"
+    expose:
+      - "27017"
+    restart: unless-stopped
+    networks:
+      - db_network
+
+  check-validators-web-server:
+    build:
+      context: ./
+      dockerfile: server.Dockerfile
+    container_name: check-validators-web-server
+    volumes:
+      - ../src/abis:/home/node/server/indexer/contracts
+    working_dir: /home/node/server
+    tty: true
+    depends_on:
+      - check-validators-web-mongo
+    environment:
+      - MONGO_URL=mongodb://check-validators-web-mongo:27017/
+      - PORT=9000
+      - DOCKER=yes
+    ports:
+      - "9000:9000"
+    command: npm start
+    restart: unless-stopped
+    networks:
+      - db_network
+      - app_network
+
+  check-validators-web-client:
+    build:
+      context: ./
+      dockerfile: client.Dockerfile
+    container_name: check-validators-web-client
+    working_dir: /home/node/client
+    stdin_open: true
+    tty: true
+    depends_on:
+      - check-validators-web-server
+      - check-validators-web-mongo
+    environment:
+      - REACT_APP_SERVER_PORT=9000
+      - PORT=5000
+      - REACT_APP_SERVER_HOST=check-validators-web-server
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+    command: ["/bin/bash", "-c", "/home/node/client/start.sh"]
+    restart: unless-stopped
+    networks:
+      - app_network
+
+networks:
+  app_network:
+  db_network:

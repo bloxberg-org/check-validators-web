@@ -1,0 +1,6 @@
+{
+	"env" : {
+		"stage" : "testing",
+		"user" : "$CI_JOB_NAME"
+	}
+}
