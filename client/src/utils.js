@@ -45,14 +45,13 @@ export function getInstituteName(address) {
  * @returns {Promise<Number>} that resolves to the timestamp of the last block.
  */
 export function getLastBlock(address) {
-  console.log('Asking the last block for ' + address)
+  // console.log('Asking the last block for ' + address)
   return fetch(
     'https://blockexplorer.bloxberg.org/api?module=account&action=getminedblocks&address=' +
       address +
       '&page=1&offset=1',
   )
     .then((res) => {
-      console.log('resresres', res)
       return res.json()
     })
     .then((json) => json.result[0].timeStamp)

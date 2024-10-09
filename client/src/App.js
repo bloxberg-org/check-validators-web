@@ -36,7 +36,10 @@ function App() {
   const [blockData, setBlocksData] = useState({})
   const [validatorNames, setValidatorNames] = useState({})
 
+  // var API_URI = 'https://' + window.env.NODE_ENV
+  // var API_URI = 'https://bloxberg-qa-check-validators-srv.mpdl.mpg.de'
   var API_URI = 'http://localhost:9000'
+
 
   // if (process.env.NODE_ENV === 'development') {
   //   API_URI = 'http://localhost:9000'
@@ -46,6 +49,7 @@ function App() {
   // }
 
   const URL = API_URI + '/api'
+  
 
   useEffect(() => {
     axios.get(URL + '/validators').then((res) => {
@@ -53,16 +57,15 @@ function App() {
       let count14d = 0
       let alladr = []
       let allValidatorsNames = {}
-
-      if (!res.data[0].lastseenonline) {
+      if (!res.data[0]._id) {
         getValidatorsList()
           .then((arr) => {
-            console.log('Getting validtors', arr)
+            // console.log('Getting validtors', arr)
             setValidators(arr)
             return arr
           })
           .then((validators) => {
-            console.log('Checking last blocks')
+            // console.log('Checking last blocks')
             async function checkLastBlocks() {
               let count24h = 0
               let count14d = 0
